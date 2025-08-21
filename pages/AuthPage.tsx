@@ -1,7 +1,8 @@
+
 import React, { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAppStore } from '../stores/useAppStore';
 
 type AuthView = 'login' | 'register' | 'forgot';
 
@@ -27,7 +28,7 @@ const AuthForm: React.FC<{
   setView: (view: AuthView) => void,
   showToast: (message: string, type: 'success' | 'error') => void
 }> = ({ view, setView, showToast }) => {
-  const { login, register } = useAuth();
+  const { login, register } = useAppStore();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

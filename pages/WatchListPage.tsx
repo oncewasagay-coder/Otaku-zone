@@ -1,26 +1,33 @@
+
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { Anime, WatchListStatus } from '../types';
 import { WatchListCard } from '../components/WatchListCard';
-import { useAuth } from '../contexts/AuthContext';
+import { useAppStore } from '../stores/useAppStore';
+import { animeDatabase } from '../constants';
 
-interface WatchListPageProps {
-    items: { anime: Anime; status: WatchListStatus }[];
-    getAnimeTitle: (anime: Anime) => string;
-}
+interface WatchListPageProps {}
 
 const filterTabs: WatchListStatus[] = ['All', 'Watching', 'On-Hold', 'Plan to Watch', 'Dropped', 'Completed'];
 
-export const WatchListPage: React.FC<WatchListPageProps> = ({ items, getAnimeTitle }) => {
-    const { user, updateSettings } = useAuth();
+export const WatchListPage: React.FC<WatchListPageProps> = () => {
+    const { user, library, updateUserSettings } = useAppStore();
     const [activeFilter, setActiveFilter] = useState<WatchListStatus>('All');
 
     const handlePublicToggle = () => {
         if (user) {
-            updateSettings({ ...user.settings, publicWatchList: !user.settings.publicWatchList });
+            updateUserSettings({ ...user.settings, publicWatchList: !user.settings.publicWatchList });
         }
     };
+
+    const items = useMemo(() => {
+        const animeMap = new Map(animeDatabase.map(a => [a.id, a]));
+        return library.map(libItem => ({
+            anime: animeMap.get(libItem.animeId)!,
+            status: libItem.folder,
+        })).filter(item => item.anime);
+    }, [library]);
 
     const filteredItems = useMemo(() => {
         if (activeFilter === 'All') return items;
@@ -78,7 +85,7 @@ export const WatchListPage: React.FC<WatchListPageProps> = ({ items, getAnimeTit
             <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 <AnimatePresence>
                     {filteredItems.map(({ anime }, index) => (
-                        <WatchListCard key={anime.id} anime={anime} index={index} getAnimeTitle={getAnimeTitle} />
+                        <WatchListCard key={anime.id} anime={anime} index={index} />
                     ))}
                 </AnimatePresence>
             </motion.div>

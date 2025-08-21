@@ -1,19 +1,20 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Play, Plus, Star } from 'lucide-react';
+import { Flame, Play, Plus } from 'lucide-react';
 import { Anime } from '../types';
 import { ImageWithLoader } from './ImageWithLoader';
-import { useAuth } from '../contexts/AuthContext';
+import { useAppStore } from '../stores/useAppStore';
 
 interface FeaturedHeroProps {
   anime: Anime;
   onWatch: (anime: Anime) => void;
-  onAddToWatchList: (animeId: number) => void;
+  onAddToWatchList: (animeId: string) => void;
   getAnimeTitle: (anime: Anime) => string;
 }
 
 export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, onAddToWatchList, getAnimeTitle }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAppStore();
 
   if (!anime) return null;
 
@@ -28,7 +29,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, onAd
       <div className="absolute inset-0">
         <ImageWithLoader 
             src={anime.banner} 
-            alt={anime.title} 
+            alt={getAnimeTitle(anime)} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
@@ -61,7 +62,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, onAd
             transition={{ delay: 0.4 }}
             className="text-gray-300 mb-6 line-clamp-3 text-base sm:text-lg"
           >
-            {anime.description}
+            {anime.synopsis}
           </motion.p>
           
           <motion.div
@@ -70,14 +71,9 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, onAd
             transition={{ delay: 0.5 }}
             className="flex items-center gap-4 mb-6 text-sm text-gray-400"
           >
-            <div className="flex items-center gap-1 text-amber-400 font-bold">
-              <Star className="w-4 h-4 fill-current" />
-              <span>{anime.rating}</span>
-            </div>
-            <span className="text-gray-600">•</span>
             <span>{anime.year}</span>
             <span className="text-gray-600">•</span>
-            <span>{anime.episodes} episodes</span>
+            <span>{anime.episodes.length} episodes</span>
           </motion.div>
           
           <motion.div

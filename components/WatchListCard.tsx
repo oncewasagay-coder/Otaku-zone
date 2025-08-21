@@ -1,16 +1,23 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MoreVertical, Mic, Subtitles } from 'lucide-react';
+import { MoreVertical, Tv, Calendar } from 'lucide-react';
 import { Anime } from '../types';
 import { ImageWithLoader } from './ImageWithLoader';
+import { useAppStore } from '../stores/useAppStore';
 
 interface WatchListCardProps {
   anime: Anime;
   index: number;
-  getAnimeTitle: (anime: Anime) => string;
 }
 
-export const WatchListCard: React.FC<WatchListCardProps> = ({ anime, index, getAnimeTitle }) => {
+export const WatchListCard: React.FC<WatchListCardProps> = ({ anime, index }) => {
+  const { user } = useAppStore();
+
+  const getAnimeTitle = (anime: Anime) => {
+    return user?.settings.titleLang === 'JP' && anime.titleJP ? anime.titleJP : anime.titleEN;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,7 +30,7 @@ export const WatchListCard: React.FC<WatchListCardProps> = ({ anime, index, getA
         <div className="aspect-[2/3] overflow-hidden">
           <ImageWithLoader 
             src={anime.poster} 
-            alt={anime.title} 
+            alt={getAnimeTitle(anime)} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
           />
         </div>
@@ -43,17 +50,8 @@ export const WatchListCard: React.FC<WatchListCardProps> = ({ anime, index, getA
             <h3 className="font-semibold text-white truncate text-sm mb-1 group-hover:text-pink-400 transition-colors">{getAnimeTitle(anime)}</h3>
           </div>
           <div className="flex items-center gap-2 flex-wrap text-xs text-gray-400 mb-2">
-            <span>TV</span>
-            <span>•</span>
-            <span>{anime.duration}</span>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5 text-xs bg-green-900/50 text-green-300 py-1 px-2 rounded-md border border-green-500/20">
-                  <Subtitles size={12}/> {anime.subs}
-              </div>
-              <div className="flex items-center gap-1.5 text-xs bg-blue-900/50 text-blue-300 py-1 px-2 rounded-md border border-blue-500/20">
-                  <Mic size={12}/> {anime.dubs}
-              </div>
+            <div className="flex items-center gap-1"><Tv size={12}/><span>{anime.type}</span></div>
+            {anime.year && <><span className="text-gray-600">•</span><div className="flex items-center gap-1"><Calendar size={12}/><span>{anime.year}</span></div></>}
           </div>
         </div>
       </div>

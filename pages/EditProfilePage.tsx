@@ -1,29 +1,25 @@
+
 import React, { useState, useEffect, ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
-import { User, CheckCircle, Pencil, LockKeyhole } from 'lucide-react';
+import { User as UserIcon, CheckCircle, Pencil, LockKeyhole } from 'lucide-react';
 import { ImageWithLoader } from '../components/ImageWithLoader';
-import { useAuth } from '../contexts/AuthContext';
-import { User as UserType } from '../types';
+import { useAppStore } from '../stores/useAppStore';
 
-interface EditProfilePageProps {
-    onSave: (profile: Partial<UserType>) => void;
-}
-
-export const EditProfilePage: React.FC<EditProfilePageProps> = ({ onSave }) => {
-    const { user } = useAuth();
+export const EditProfilePage: React.FC = () => {
+    const { user, updateUserProfile } = useAppStore();
     const [name, setName] = useState(user?.name || '');
     const [avatar, setAvatar] = useState(user?.avatar || '');
 
     useEffect(() => {
         if (user) {
             setName(user.name);
-            setAvatar(user.avatar);
+            setAvatar(user.avatar || '');
         }
     }, [user]);
     
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({ name, avatar });
+        updateUserProfile({ name, avatar });
     };
 
     const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +42,7 @@ export const EditProfilePage: React.FC<EditProfilePageProps> = ({ onSave }) => {
             className="w-full max-w-5xl mx-auto"
         >
             <div className="flex items-center gap-4 mb-8">
-                <User className="w-8 h-8 text-gray-300" />
+                <UserIcon className="w-8 h-8 text-gray-300" />
                 <h2 className="text-3xl font-bold text-white">Edit Profile</h2>
             </div>
 
@@ -62,7 +58,7 @@ export const EditProfilePage: React.FC<EditProfilePageProps> = ({ onSave }) => {
                                 readOnly
                                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
                             />
-                            {user.emailVerified && (
+                            {user.verified && (
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
                                     <span className="flex items-center gap-1.5 bg-green-900/50 text-green-400 py-1 px-2 rounded-md border border-green-500/20">
                                         <CheckCircle size={14} /> Verified
@@ -78,15 +74,6 @@ export const EditProfilePage: React.FC<EditProfilePageProps> = ({ onSave }) => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full px-4 py-3 mt-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold text-gray-400 tracking-wider">JOINED</label>
-                        <input
-                            type="text"
-                            value={user.joinDate}
-                            readOnly
-                            className="w-full px-4 py-3 mt-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
                         />
                     </div>
 

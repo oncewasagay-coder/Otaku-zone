@@ -1,13 +1,13 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { History } from 'lucide-react';
-import { Anime, WatchProgressDetail } from '../types';
+import { Anime, WatchProgressDetail, HistoryItem } from '../types';
 import { AnimeProgressCard } from '../components/AnimeProgressCard';
+import { useAppStore } from '../stores/useAppStore';
+import { animeDatabase } from '../constants';
 
-interface ContinueWatchingPageProps {
-    items: { anime: Anime; progress: WatchProgressDetail }[];
-    getAnimeTitle: (anime: Anime) => string;
-}
+interface ContinueWatchingPageProps {}
 
 const ITEMS_PER_PAGE = 25;
 
@@ -51,8 +51,32 @@ const Pagination: React.FC<{ currentPage: number, totalPages: number, onPageChan
     );
 };
 
+const createProgressItems = (history: HistoryItem[], animes: Anime[]) => {
+    const animeMap = new Map(animes.map(a => [a.id, a]));
+    return history
+        .map(item => {
+            const anime = animeMap.get(item.animeId);
+            if (!anime) return null;
+            const episode = anime.episodes.find(e => e.id === item.epId);
+            if (!episode) return null;
 
-export const ContinueWatchingPage: React.FC<ContinueWatchingPageProps> = ({ items, getAnimeTitle }) => {
+            return {
+                anime,
+                progress: {
+                    watchedTime: item.positionSec,
+                    totalTime: episode.durationSec || 1440,
+                    watchedEpisodes: episode.number,
+                    totalEpisodes: anime.episodes.length,
+                } as WatchProgressDetail
+            };
+        })
+        .filter((item): item is { anime: Anime; progress: WatchProgressDetail } => item !== null);
+}
+
+
+export const ContinueWatchingPage: React.FC<ContinueWatchingPageProps> = () => {
+    const { user } = useAppStore();
+    const items = user ? createProgressItems(user.watchHistory, animeDatabase) : [];
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
 
@@ -79,8 +103,7 @@ export const ContinueWatchingPage: React.FC<ContinueWatchingPageProps> = ({ item
                             key={anime.id} 
                             anime={anime} 
                             progress={progress} 
-                            index={index} 
-                            getAnimeTitle={getAnimeTitle}
+                            index={index}
                         />
                     ))}
                 </AnimatePresence>

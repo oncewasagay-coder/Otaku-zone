@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { UserSettings, WatchListStatus } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { Settings, ListFolder } from '../types';
+import { useAppStore } from '../stores/useAppStore';
 
 // Reusable Components for the Settings Page
 
@@ -40,7 +41,7 @@ const RadioGroup: React.FC<{
     <p className="font-medium text-white mb-3">{label}</p>
     <div className="flex items-center gap-6">
       {options.map((option) => (
-        <label key={option} className="flex items-center gap-2 cursor-pointer text-gray-300">
+        <label key={option} className="flex items-center gap-2 cursor-pointer text-gray-300" onClick={() => onChange(option)}>
           <div className="relative w-5 h-5 rounded-full border-2 border-gray-500 flex items-center justify-center">
             {selectedValue === option && (
               <motion.div
@@ -74,7 +75,7 @@ const CheckboxGroup: React.FC<{
       <p className="font-medium text-white mb-3">{label}</p>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         {options.map((option) => (
-          <label key={option} className="flex items-center gap-2 cursor-pointer text-gray-300">
+          <label key={option} className="flex items-center gap-2 cursor-pointer text-gray-300" onClick={() => handleToggle(option)}>
             <div className="relative w-5 h-5 rounded-md border-2 border-gray-500 flex items-center justify-center bg-gray-700/50">
               {selectedValues.includes(option) && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
@@ -93,13 +94,9 @@ const CheckboxGroup: React.FC<{
 };
 
 
-interface SettingsPageProps {
-  onSave: (settings: UserSettings) => void;
-}
-
-export const SettingsPage: React.FC<SettingsPageProps> = ({ onSave }) => {
-  const { user } = useAuth();
-  const [settings, setSettings] = useState<UserSettings | null>(user?.settings || null);
+export const SettingsPage: React.FC = () => {
+  const { user, updateUserSettings } = useAppStore();
+  const [settings, setSettings] = useState<Settings | null>(user?.settings || null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -108,20 +105,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSave }) => {
     }
   }, [user]);
 
-  const handleSettingChange = <T extends keyof UserSettings>(key: T, value: UserSettings[T]) => {
+  const handleSettingChange = <T extends keyof Settings>(key: T, value: Settings[T]) => {
     setSettings(prev => prev ? { ...prev, [key]: value } : null);
   };
   
   const handleSaveChanges = () => {
       if (!settings) return;
       setIsSaving(true);
-      setTimeout(() => {
-          onSave(settings);
-          setIsSaving(false);
-      }, 1000);
+      updateUserSettings(settings).finally(() => {
+        setIsSaving(false)
+      });
   };
 
-  const watchListStatusOptions: WatchListStatus[] = ['Watching', 'On-Hold', 'Plan to Watch', 'Dropped', 'Completed'];
+  const watchListStatusOptions: ListFolder[] = ['Watching', 'On-Hold', 'Plan to Watch', 'Dropped', 'Completed'];
   
   if (!settings) return null;
 
@@ -145,7 +141,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSave }) => {
         <RadioGroup label="Language for anime name" options={['English', 'Japanese']} selectedValue={settings.animeNameLanguage} onChange={(val) => handleSettingChange('animeNameLanguage', val as 'English' | 'Japanese')} />
         <ToggleSwitch label="Show comments at home" enabled={settings.showCommentsAtHome} onChange={(val) => handleSettingChange('showCommentsAtHome', val)} />
         <ToggleSwitch label="Public Watch List" enabled={settings.publicWatchList} onChange={(val) => handleSettingChange('publicWatchList', val)} />
-        <CheckboxGroup label="Notification ignore folders" options={watchListStatusOptions} selectedValues={settings.notificationIgnoreFolders} onChange={(val) => handleSettingChange('notificationIgnoreFolders', val as WatchListStatus[])} />
+        <CheckboxGroup label="Notification ignore folders" options={watchListStatusOptions} selectedValues={settings.notificationIgnoreFolders} onChange={(val) => handleSettingChange('notificationIgnoreFolders', val as ListFolder[])} />
         <RadioGroup label="Notification ignore language" options={['None', 'SUB', 'DUB']} selectedValue={settings.notificationIgnoreLanguage} onChange={(val) => handleSettingChange('notificationIgnoreLanguage', val as 'None' | 'SUB' | 'DUB')} />
         
         <div className="mt-8">

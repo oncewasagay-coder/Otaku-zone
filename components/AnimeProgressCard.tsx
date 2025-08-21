@@ -1,14 +1,15 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
 import { Anime, WatchProgressDetail } from '../types';
 import { ImageWithLoader } from './ImageWithLoader';
+import { useAppStore } from '../stores/useAppStore';
 
 interface AnimeProgressCardProps {
   anime: Anime;
   progress: WatchProgressDetail;
   index: number;
-  getAnimeTitle: (anime: Anime) => string;
 }
 
 const formatTime = (seconds: number) => {
@@ -16,8 +17,13 @@ const formatTime = (seconds: number) => {
   return new Date(seconds * 1000).toISOString().substr(14, 5);
 };
 
-export const AnimeProgressCard: React.FC<AnimeProgressCardProps> = ({ anime, progress, index, getAnimeTitle }) => {
+export const AnimeProgressCard: React.FC<AnimeProgressCardProps> = ({ anime, progress, index }) => {
+  const { user } = useAppStore();
   const progressPercent = (progress.watchedTime / progress.totalTime) * 100;
+  
+  const getAnimeTitle = (anime: Anime) => {
+      return user?.settings.titleLang === 'JP' && anime.titleJP ? anime.titleJP : anime.titleEN;
+  };
 
   return (
     <motion.div
@@ -31,7 +37,7 @@ export const AnimeProgressCard: React.FC<AnimeProgressCardProps> = ({ anime, pro
         <div className="aspect-[2/3] overflow-hidden">
           <ImageWithLoader 
             src={anime.poster} 
-            alt={anime.title} 
+            alt={getAnimeTitle(anime)} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

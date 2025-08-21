@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User as UserIcon, History, Heart, Bell, Settings, FileText, LogOut } from 'lucide-react';
@@ -7,16 +8,9 @@ import { WatchListPage } from './WatchListPage';
 import { SettingsPage } from './SettingsPage';
 import { NotificationsPage } from './NotificationsPage';
 import { MalIntegrationPage } from './MalIntegrationPage';
-import { Anime, WatchProgressDetail, WatchListStatus, UserSettings, User } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { useAppStore } from '../stores/useAppStore';
 
-interface ProfilePageProps {
-  onProfileSave: (profile: Partial<User>) => void;
-  continueWatchingItems: { anime: Anime; progress: WatchProgressDetail }[];
-  watchListItems: { anime: Anime; status: WatchListStatus }[];
-  onSettingsSave: (settings: UserSettings) => void;
-  getAnimeTitle: (anime: Anime) => string;
-}
+interface ProfilePageProps {}
 
 const profileTabs = [
   { id: 'profile', label: 'Profile', icon: UserIcon },
@@ -27,8 +21,8 @@ const profileTabs = [
   { id: 'mal', label: 'MAL', icon: FileText },
 ];
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ onProfileSave, continueWatchingItems, watchListItems, onSettingsSave, getAnimeTitle }) => {
-  const { user, logout } = useAuth();
+export const ProfilePage: React.FC<ProfilePageProps> = () => {
+  const { user, logout } = useAppStore();
   const [activeTab, setActiveTab] = useState('profile');
 
   if (!user) return null; // Should be protected by AuthGuard
@@ -36,13 +30,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onProfileSave, continu
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <EditProfilePage onSave={onProfileSave} />;
+        return <EditProfilePage />;
       case 'watching':
-        return <ContinueWatchingPage items={continueWatchingItems} getAnimeTitle={getAnimeTitle} />;
+        return <ContinueWatchingPage />;
       case 'watchlist':
-        return <WatchListPage items={watchListItems} getAnimeTitle={getAnimeTitle} />;
+        return <WatchListPage />;
       case 'settings':
-        return <SettingsPage onSave={onSettingsSave} />;
+        return <SettingsPage />;
       case 'notifications':
         return <NotificationsPage />;
       case 'mal':

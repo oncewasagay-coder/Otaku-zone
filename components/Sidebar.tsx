@@ -1,26 +1,40 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Library, Settings, User } from 'lucide-react';
-import { ViewType } from '../types';
+import { Home, Library, Settings, User, LogOut, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { useAppStore } from '../stores/useAppStore';
 
 interface SidebarProps {
-  currentView: ViewType;
-  setCurrentView: (view: ViewType) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, isOpen, setIsOpen }) => {
-  const navItems = [
-    { id: 'home' as ViewType, icon: Home, label: 'Home' },
-    { id: 'library' as ViewType, icon: Library, label: 'My Library' },
-    { id: 'profile' as ViewType, icon: User, label: 'Profile' }
-  ];
+const NavItem = ({ icon: Icon, label, href, isExpanded, isActive }) => (
+    <a href={href} className="block">
+        <motion.div
+          className={`flex items-center gap-4 py-3 px-4 mb-2 rounded-xl text-text-secondary font-medium cursor-pointer transition-all duration-300 ${
+            isActive 
+              ? 'bg-brand/10 text-brand border border-brand/20' 
+              : 'hover:text-text-primary hover:bg-white/5'
+          }`}
+          whileHover={{ scale: 1.02, x: isExpanded ? 4 : 0 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Icon className={`w-6 h-6 flex-shrink-0 ${isActive ? 'text-brand' : ''}`} />
+          <AnimatePresence>
+              {isExpanded && <motion.span initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="whitespace-nowrap">{label}</motion.span>}
+          </AnimatePresence>
+        </motion.div>
+    </a>
+)
 
-  const sidebarVariants = {
-    open: { x: 0 },
-    closed: { x: '-100%' },
-  };
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+  const { logout, currentView } = useAppStore();
+
+  const navItems = [
+    { href: '#home', icon: Home, label: 'Home' },
+    { href: '#library', icon: Library, label: 'My Library' },
+    { href: '#profile', icon: User, label: 'Profile' }
+  ];
 
   return (
     <>
@@ -36,43 +50,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, i
         )}
       </AnimatePresence>
       <motion.div
-        variants={sidebarVariants}
-        initial="closed"
-        animate={isOpen ? "open" : "closed"}
+        animate={{ width: isOpen ? 256 : 80 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed top-0 left-0 z-50 h-screen w-64 bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 flex flex-col lg:translate-x-0"
+        className="fixed top-0 left-0 z-50 h-screen bg-bg-elevated border-r border-border flex flex-col"
       >
-        <div className="p-6">
-          <motion.h1
-            className="cursor-pointer text-3xl font-bold text-white mb-1"
-            whileHover={{ scale: 1.05 }}
-          >
-            h!anime
-          </motion.h1>
-          <p className="text-gray-400 text-sm">Your anime destination.</p>
+        <div className={`flex items-center justify-between p-4 ${isOpen ? 'ml-2' : ''}`}>
+          {isOpen && (
+            <a href="#home" className="flex items-center gap-2">
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand to-accent" style={{color: 'var(--brand)'}}>A-B</span>
+              <h1 className="text-xl font-bold text-white">Anime Bharat</h1>
+            </a>
+          )}
+          <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-text-secondary hover:text-text-primary">
+            {isOpen ? <ChevronLeft /> : <Menu />}
+          </button>
         </div>
 
-        <nav className="px-4">
+        <nav className="flex-1 px-4 mt-8">
           {navItems.map(item => (
-            <motion.button
-              key={item.id}
-              onClick={() => {
-                setCurrentView(item.id);
-                setIsOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 py-3 px-4 mb-2 rounded-xl text-gray-400 font-medium cursor-pointer transition-all duration-300 ${
-                currentView === item.id 
-                  ? 'bg-gradient-to-r from-red-500/20 to-purple-500/20 text-white border border-red-500/30' 
-                  : 'hover:text-white hover:bg-gray-700/50'
-              }`}
-              whileHover={{ scale: 1.02, x: 4 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {item.label}
-            </motion.button>
+            <NavItem 
+                key={item.href} {...item} 
+                isExpanded={isOpen} 
+                isActive={currentView.type === item.href.substring(1)}
+            />
           ))}
         </nav>
+
+        <div className="px-4 pb-6">
+            <NavItem href="#settings" icon={Settings} label="Settings" isExpanded={isOpen} isActive={currentView.type === 'settings'} />
+            <div onClick={logout}>
+                <NavItem icon={LogOut} label="Logout" href="#" isExpanded={isOpen} isActive={false} />
+            </div>
+        </div>
       </motion.div>
     </>
   );
