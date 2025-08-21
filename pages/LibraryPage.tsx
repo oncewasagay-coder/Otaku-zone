@@ -6,10 +6,10 @@ import { AnimeCard } from '../components/AnimeCard';
 
 interface LibraryPageProps {
   favoriteAnime: Anime[];
-  favorites: number[];
   watchProgress: WatchProgress;
   onWatch: (anime: Anime) => void;
-  onToggleFavorite: (animeId: number) => void;
+  onAddToWatchList: (animeId: number) => void;
+  getAnimeTitle: (anime: Anime) => string;
 }
 
 const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string, description: string, className: string }> = ({ icon, title, value, description, className }) => (
@@ -26,7 +26,7 @@ const StatCard: React.FC<{ icon: React.ReactNode, title: string, value: string, 
     </motion.div>
 );
 
-export const LibraryPage: React.FC<LibraryPageProps> = ({ favoriteAnime, favorites, watchProgress, onWatch, onToggleFavorite }) => {
+export const LibraryPage: React.FC<LibraryPageProps> = ({ favoriteAnime, watchProgress, onWatch, onAddToWatchList, getAnimeTitle }) => {
   const watchingCount = Object.values(watchProgress).filter(p => p.watchedEpisodes > 0 && p.watchedEpisodes < p.totalEpisodes).length;
   const completedCount = Object.values(watchProgress).filter(p => p.watchedEpisodes === p.totalEpisodes).length;
 
@@ -43,7 +43,14 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ favoriteAnime, favorit
         {favoriteAnime.length > 0 ? (
            <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {favoriteAnime.map((anime, index) => (
-                  <AnimeCard key={anime.id} anime={anime} index={index} onWatch={onWatch} isFavorite={favorites.includes(anime.id)} onToggleFavorite={onToggleFavorite} />
+                  <AnimeCard 
+                      key={anime.id} 
+                      anime={anime} 
+                      index={index} 
+                      onWatch={onWatch}
+                      onAddToWatchList={onAddToWatchList}
+                      getAnimeTitle={getAnimeTitle}
+                   />
               ))}
           </motion.div>
         ) : (

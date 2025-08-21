@@ -6,9 +6,10 @@ import { ImageWithLoader } from '../components/ImageWithLoader';
 
 interface WatchPageProps {
   anime: Anime;
+  getAnimeTitle: (anime: Anime) => string;
 }
 
-export const WatchPage: React.FC<WatchPageProps> = ({ anime }) => {
+export const WatchPage: React.FC<WatchPageProps> = ({ anime, getAnimeTitle }) => {
   const [currentEpisode, setCurrentEpisode] = useState(1);
 
   return (
@@ -22,7 +23,7 @@ export const WatchPage: React.FC<WatchPageProps> = ({ anime }) => {
           <div className="aspect-video bg-black flex items-center justify-center relative text-white">
             <Play className="w-12 h-12 sm:w-20 sm:h-20 opacity-50" />
             <div className="absolute bottom-4 left-4 text-left">
-                <p className="text-lg font-semibold">{anime.title}</p>
+                <p className="text-lg font-semibold">{getAnimeTitle(anime)}</p>
                 <p className="text-sm text-gray-300">Episode {currentEpisode}</p>
             </div>
           </div>
@@ -38,8 +39,8 @@ export const WatchPage: React.FC<WatchPageProps> = ({ anime }) => {
             <div className="flex flex-col sm:flex-row gap-6">
               <ImageWithLoader src={anime.poster} alt={anime.title} className="w-32 h-48 object-cover rounded-xl flex-shrink-0 mx-auto sm:mx-0" />
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white mb-2">{anime.title}</h1>
-                <p className="text-gray-400 mb-4">{anime.japanese}</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{getAnimeTitle(anime)}</h1>
+                <p className="text-gray-400 mb-4">{getAnimeTitle(anime) === anime.title ? anime.japanese : anime.title}</p>
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-sm">
                   <div className="flex items-center gap-1.5 font-semibold text-amber-400"><Star className="w-4 h-4 fill-current" /> {anime.rating}</div>
                   <div className="flex items-center gap-1.5 text-gray-300"><Calendar className="w-4 h-4 text-gray-400" /> {anime.year}</div>

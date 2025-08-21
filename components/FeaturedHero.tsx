@@ -1,17 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, Play, Star } from 'lucide-react';
+import { Flame, Play, Plus, Star } from 'lucide-react';
 import { Anime } from '../types';
 import { ImageWithLoader } from './ImageWithLoader';
+import { useAuth } from '../contexts/AuthContext';
 
 interface FeaturedHeroProps {
   anime: Anime;
   onWatch: (anime: Anime) => void;
-  isFavorite: boolean;
-  onToggleFavorite: (animeId: number) => void;
+  onAddToWatchList: (animeId: number) => void;
+  getAnimeTitle: (anime: Anime) => string;
 }
 
-export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, isFavorite, onToggleFavorite }) => {
+export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, onAddToWatchList, getAnimeTitle }) => {
+  const { isAuthenticated } = useAuth();
+
   if (!anime) return null;
 
   return (
@@ -49,7 +52,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, isFa
             transition={{ delay: 0.3 }}
             className="text-3xl sm:text-5xl font-bold text-white mb-4 leading-tight"
           >
-            {anime.title}
+            {getAnimeTitle(anime)}
           </motion.h2>
           
           <motion.p
@@ -92,15 +95,17 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ anime, onWatch, isFa
               <Play className="w-5 h-5" />
               Watch Now
             </motion.button>
-            <motion.button
-              className="bg-gray-700/80 text-white py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2"
-              whileHover={{ scale: 1.05, backgroundColor: 'rgba(75, 85, 99, 0.8)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={(e) => { e.stopPropagation(); onToggleFavorite(anime.id); }}
-            >
-              <Heart className={`w-5 h-5 transition-colors ${isFavorite ? 'text-red-500 fill-current' : ''}`} />
-              {isFavorite ? 'In List' : 'Add to List'}
-            </motion.button>
+            {isAuthenticated && (
+              <motion.button
+                className="bg-gray-700/80 text-white py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2"
+                whileHover={{ scale: 1.05, backgroundColor: 'rgba(75, 85, 99, 0.8)' }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => { e.stopPropagation(); onAddToWatchList(anime.id); }}
+              >
+                <Plus className="w-5 h-5" />
+                Add to List
+              </motion.button>
+            )}
           </motion.div>
         </div>
       </div>

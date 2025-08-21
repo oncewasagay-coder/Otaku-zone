@@ -1,18 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Play, Star } from 'lucide-react';
+import { Plus, Play, Star } from 'lucide-react';
 import { Anime } from '../types';
 import { ImageWithLoader } from './ImageWithLoader';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AnimeCardProps {
   anime: Anime;
   index: number;
   onWatch: (anime: Anime) => void;
-  isFavorite: boolean;
-  onToggleFavorite: (animeId: number) => void;
+  onAddToWatchList: (animeId: number) => void;
+  getAnimeTitle: (anime: Anime) => string;
 }
 
-export const AnimeCard: React.FC<AnimeCardProps> = ({ anime, index, onWatch, isFavorite, onToggleFavorite }) => {
+export const AnimeCard: React.FC<AnimeCardProps> = ({ anime, index, onWatch, onAddToWatchList, getAnimeTitle }) => {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -32,18 +35,20 @@ export const AnimeCard: React.FC<AnimeCardProps> = ({ anime, index, onWatch, isF
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
         
-        <motion.button
-          className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full opacity-0 transition-all group-hover:opacity-100 z-10"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(anime.id);
-          }}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <Heart className={`w-4 h-4 transition-colors ${isFavorite ? 'text-red-500 fill-current' : 'text-white'}`} />
-        </motion.button>
+        {isAuthenticated && (
+          <motion.button
+            className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full opacity-0 transition-all group-hover:opacity-100 z-10 text-white hover:text-pink-400"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToWatchList(anime.id);
+            }}
+            aria-label="Add to watch list"
+          >
+            <Plus className="w-4 h-4" />
+          </motion.button>
+        )}
         
         <div className="absolute inset-0 p-4 flex flex-col justify-end opacity-0 transition-all duration-300 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
           <div className="bg-black/70 backdrop-blur-md rounded-lg p-3">
@@ -68,8 +73,8 @@ export const AnimeCard: React.FC<AnimeCardProps> = ({ anime, index, onWatch, isF
         </div>
 
         <div className="p-4 transition-opacity group-hover:opacity-0">
-          <h3 className="font-semibold text-white truncate">{anime.title}</h3>
-          <p className="text-gray-400 text-sm truncate mb-2">{anime.japanese}</p>
+          <h3 className="font-semibold text-white truncate">{getAnimeTitle(anime)}</h3>
+          <p className="text-gray-400 text-sm truncate mb-2">{getAnimeTitle(anime) === anime.title ? anime.japanese : anime.title}</p>
           <div className="flex flex-wrap gap-1">
             {anime.genre.slice(0, 2).map(g => (
               <span key={g} className="text-xs bg-gray-700/50 text-gray-300 py-0.5 px-2 rounded-full">{g}</span>

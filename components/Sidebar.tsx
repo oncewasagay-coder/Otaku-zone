@@ -14,8 +14,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, i
   const navItems = [
     { id: 'home' as ViewType, icon: Home, label: 'Home' },
     { id: 'library' as ViewType, icon: Library, label: 'My Library' },
-    { id: 'profile' as ViewType, icon: User, label: 'Profile' },
-    { id: 'settings' as ViewType, icon: Settings, label: 'Settings' }
+    { id: 'profile' as ViewType, icon: User, label: 'Profile' }
   ];
 
   const sidebarVariants = {
@@ -45,12 +44,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, i
       >
         <div className="p-6">
           <motion.h1
-            className="cursor-pointer text-2xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent mb-1"
+            className="cursor-pointer text-3xl font-bold text-white mb-1"
             whileHover={{ scale: 1.05 }}
           >
-            OtakuZone
+            h!anime
           </motion.h1>
-          <p className="text-gray-400 text-sm">Anime Paradise</p>
+          <p className="text-gray-400 text-sm">Your anime destination.</p>
         </div>
 
         <nav className="px-4">
@@ -74,20 +73,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView, i
             </motion.button>
           ))}
         </nav>
-
-        <div className="mt-auto p-6">
-          <div className="bg-gradient-to-r from-red-500/10 to-purple-500/10 rounded-xl p-4 border border-red-500/20">
-            <h3 className="text-white font-semibold mb-1">Go Premium!</h3>
-            <p className="text-gray-400 text-sm mb-3">Ad-free streaming & more</p>
-            <motion.button
-              className="w-full bg-gradient-to-r from-red-500 to-purple-500 text-white py-2 px-4 rounded-lg font-semibold cursor-pointer"
-              whileHover={{ scale: 1.02, boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Upgrade Now
-            </motion.button>
-          </div>
-        </div>
       </motion.div>
     </>
   );
